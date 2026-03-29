@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kinetic Scholar — A gamified learning platform with XP, streaks, achievements, and NPTEL-style course structures.">
+    <title>Kinetic Scholar | Gamified Learning Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ═══ CONFETTI CANVAS ═══ -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- ═══ TOAST CONTAINER ═══ -->
+    <div id="toast-container"></div>
+
+    <!-- ═══ MODAL CONTAINER ═══ -->
+    <div id="modal-container"></div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- AUTH SCREEN                            -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="auth-screen" class="auth-screen">
+        <div id="auth-particles" class="auth-particles"></div>
+        <div class="auth-wrapper">
+            <div class="auth-brand">
+                <div class="brand-icon">
+                    <span class="material-icons-round">auto_awesome</span>
+                </div>
+                <h1 class="brand-title">Kinetic Scholar</h1>
+                <p class="brand-subtitle">Master knowledge through play</p>
+            </div>
+
+            <!-- Login Card -->
+            <div id="login-card" class="auth-card">
+                <h2>Welcome Back</h2>
+                <p class="auth-desc">Continue your learning journey</p>
+                <div class="auth-field">
+                    <span class="material-icons-round">person</span>
+                    <input type="text" id="login-username" placeholder="Username" autocomplete="username">
+                </div>
+                <div class="auth-field">
+                    <span class="material-icons-round">lock</span>
+                    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+                </div>
+                <div id="login-error" class="auth-error"></div>
+                <button id="login-btn" class="btn-primary-gradient">
+                    <span class="material-icons-round">login</span> Sign In
+                </button>
+                <p class="auth-switch">Don't have an account? <a href="#" onclick="app.ui.showSignup()">Create one</a></p>
+            </div>
+
+            <!-- Signup Card -->
+            <div id="signup-card" class="auth-card hidden">
+                <h2>Join the Scholars</h2>
+                <p class="auth-desc">Start earning XP today</p>
+                <div class="auth-field">
+                    <span class="material-icons-round">person_add</span>
+                    <input type="text" id="signup-username" placeholder="Username" autocomplete="username">
+                </div>
+                <div class="auth-field">
+                    <span class="material-icons-round">email</span>
+                    <input type="email" id="signup-email" placeholder="Email" autocomplete="email">
+                </div>
+                <div class="auth-field">
+                    <span class="material-icons-round">lock</span>
+                    <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password">
+                </div>
+                <div id="signup-error" class="auth-error"></div>
+                <button id="signup-btn" class="btn-primary-gradient">
+                    <span class="material-icons-round">rocket_launch</span> Create Account
+                </button>
+                <p class="auth-switch">Already have an account? <a href="#" onclick="app.ui.showLogin()">Sign in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- MAIN APP CONTAINER                     -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="app-container" class="app-container hidden">
+
+        <!-- ─── SIDEBAR (Desktop) ─── -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <span class="material-icons-round brand-glyph">auto_awesome</span>
+                <span class="brand-text">Kinetic Scholar</span>
+            </div>
+
+            <div class="sidebar-profile">
+                <div class="sidebar-avatar" id="sidebar-avatar">A</div>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-username" id="sidebar-username">Scholar</span>
+                    <span class="sidebar-level" id="sidebar-level">Level 1</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-tab active" data-tab="dashboard" onclick="app.ui.switchTab('dashboard')">
+                    <span class="material-icons-round">dashboard</span>
+                    <span class="nav-label">Dashboard</span>
+                </button>
+                <button class="nav-tab" data-tab="courses" onclick="app.ui.switchTab('courses')">
+                    <span class="material-icons-round">auto_stories</span>
+                    <span class="nav-label">Courses</span>
+                </button>
+                <button class="nav-tab" data-tab="leaderboard" onclick="app.ui.switchTab('leaderboard')">
+                    <span class="material-icons-round">leaderboard</span>
+                    <span class="nav-label">Analytics</span>
+                </button>
+                <button class="nav-tab" data-tab="profile" onclick="app.ui.switchTab('profile')">
+                    <span class="material-icons-round">person</span>
+                    <span class="nav-label">Profile</span>
+                </button>
+                <button class="nav-tab" data-tab="upload" onclick="app.ui.switchTab('upload')">
+                    <span class="material-icons-round">upload_file</span>
+                    <span class="nav-label">Import</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="sidebar-btn" onclick="app.sound.toggle()" title="Toggle Sound">
+                    <span class="material-icons-round">volume_up</span>
+                </button>
+                <button class="sidebar-btn" onclick="app.ui.toggleTheme()" title="Toggle Theme">
+                    <span class="material-icons-round" id="theme-icon">dark_mode</span>
+                </button>
+                <button class="sidebar-btn" onclick="app.auth.logout()" title="Logout">
+                    <span class="material-icons-round">logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ─── MAIN CONTENT ─── -->
+        <main class="main-content">
+
+            <!-- ─── TOP BAR ─── -->
+            <header class="top-bar">
+                <button class="mobile-menu-btn" onclick="app.ui.toggleSidebar()">
+                    <span class="material-icons-round">menu</span>
+                </button>
+                <div class="top-bar-stats">
+                    <div class="stat-chip xp-chip">
+                        <span class="material-icons-round">star</span>
+                        <span id="nav-xp">0</span>
+                    </div>
+                    <div class="stat-chip streak-chip">
+                        <span class="material-icons-round">local_fire_department</span>
+                        <span id="nav-streak">0</span>
+                    </div>
+                    <div class="stat-chip hearts-chip">
+                        <span class="material-icons-round">favorite</span>
+                        <span id="nav-hearts">5</span>
+                    </div>
+                </div>
+                <button class="top-bar-avatar" id="nav-profile-btn" onclick="app.ui.switchTab('profile')">A</button>
+            </header>
+
+            <!-- ═══════════════════════════════════ -->
+            <!-- DASHBOARD VIEW                     -->
+            <!-- ═══════════════════════════════════ -->
+            <section id="dashboard-view" class="view-section">
+                <!-- Hero Banner -->
+                <div class="hero-banner">
+                    <div class="hero-content">
+                        <h1 id="welcome-msg">Keep it up, Scholar!</h1>
+                        <p class="hero-sub" id="hero-sub">You're making great progress. Keep the momentum going!</p>
+                        <div class="hero-level-bar">
+                            <span class="level-tag" id="level-badge">Level 1</span>
+                            <div class="level-progress-wrapper">
+                                <div class="level-progress-track">
+                                    <div class="level-progress-fill" id="level-progress-fill"></div>
+                                </div>
+                                <span class="level-xp-text" id="level-xp-text">0 / 100 XP</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-graphic">
+                        <div class="hero-orb"></div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Row -->
+                <div class="quick-actions">
+                    <button class="action-card sync-card" onclick="app.excel.exportReport()">
+                        <span class="material-icons-round">cloud_sync</span>
+                        <div>
+                            <h4>Quick Sync</h4>
+                            <p>Export your progress report</p>
+                        </div>
+                    </button>
+                    <div class="action-card streak-card">
+                        <span class="material-icons-round">local_fire_department</span>
+                        <div>
+                            <h4>Daily Streak</h4>
+                            <p id="streak-display">0 days 🔥</p>
+                        </div>
+                    </div>
+                    <button class="action-card daily-card" onclick="app.daily.start()">
+                        <span class="material-icons-round">bolt</span>
+                        <div>
+                            <h4>Daily Challenge</h4>
+                            <p id="daily-status">Mixed topics — test your knowledge!</p>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon-bg purple"><span class="material-icons-round">star</span></div>
+                        <div class="stat-value" id="stat-total-xp">0</div>
+                        <div class="stat-label">Total XP</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon-bg orange"><span class="material-icons-round">local_fire_department</span></div>
+                        <div class="stat-value" id="stat-streak">0</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon-bg cyan"><span class="material-icons-round">check_circle</span></div>
+                        <div class="stat-value" id="stat-completed">0</div>
+                        <div class="stat-label">Topics Done</div>
+                    </div>
+                </div>
+
+                <!-- Current Courses -->
+                <div class="section-header">
+                    <h2>Current Courses</h2>
+                    <button class="see-all-btn" onclick="app.ui.switchTab('courses')">See All <span class="material-icons-round">arrow_forward</span></button>
+                </div>
+                <div id="course-grid" class="course-grid"></div>
+
+                <!-- Recent Achievements -->
+                <div class="section-header">
+                    <h2>Recent Achievements</h2>
+                    <button class="see-all-btn" onclick="app.ui.switchTab('profile')">View All <span class="material-icons-round">arrow_forward</span></button>
+                </div>
+                <div id="dashboard-achievements" class="achievements-row"></div>
+            </section>
+
+            <!-- ═══════════════════════════════════ -->
+            <!-- COURSES VIEW (Course Selection)    -->
+            <!-- ═══════════════════════════════════ -->
+            <section id="courses-view" class="view-section hidden">
+                <div class="page-header">
+                    <h1>Choose Your Learning Path</h1>
+                    <p>Personalize your curriculum by selecting a core discipline. Every choice propels you closer to Kinetic Mastery.</p>
+                </div>
+                <div id="all-courses-grid" class="courses-selection-grid"></div>
+                <div class="mastery-banner">
+                    <span class="material-icons-round">workspace_premium</span>
+                    <div>
+                        <h4>Mastering Multiple Paths</h4>
+                        <p>Completing foundations in all categories unlocks the Kinetic Core badge and grants +2500 XP bonus.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════════════════════ -->
+            <!-- COURSE DETAIL (Topic Selection)    -->
+            <!-- ═══════════════════════════════════ -->
+            <section id="course-view" class="view-section hidden">
+                <button class="back-btn" onclick="app.ui.switchTab('courses')">
+                    <span class="material-icons-round">arrow_back</span> Back to Courses
+                </button>
+                <div class="course-detail-header">
+                    <h1 id="course-title">Course</h1>
+                    <p id="course-desc">Description</p>
+                    <p class="course-progress-hint" id="course-progress-hint"></p>
+                </div>
+                <div id="skill-tree" class="skill-tree"></div>
+                <div class="focus-recommendation hidden" id="focus-recommendation">
+                    <span class="material-icons-round">tips_and_updates</span>
+                    <div>
+                        <h4 id="focus-title">Focus Recommendation</h4>
+                        <p id="focus-desc">We recommend reviewing this topic.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════════════════════ -->
+            <!-- QUIZ VIEW                          -->
+            <!-- ═══════════════════════════════════ -->
+            <section id="quiz-view" class="view-section hidden">
+                <div class="quiz-top-row">
+                    <button class="quiz-close-btn" onclick="app.quiz.confirmQuit()">
+                        <span class="material-icons-round">close</span>
+                    </button>
+                    <div class="quiz-progress-bar">
+                        <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+                    </div>
+                    <div class="quiz-meta-row">
+                        <span class="quiz-topic-badge" id="quiz-topic-badge">Topic</span>
+                        <span id="quiz-difficulty" class="difficulty-badge easy">EASY</span>
+                        <span class="quiz-timer" id="quiz-timer">00:00</span>
+                    </div>
+                </div>
+
+                <div class="quiz-hearts-row" id="quiz-hearts"></div>
+
+                <div class="quiz-card">
+                    <div class="quiz-q-number" id="quiz-q-number">1 / 10</div>
+                    <h2 class="quiz-question-text" id="quiz-question-text">Loading question...</h2>
+                </div>
+
+                <div class="quiz-options" id="quiz-options"></div>
+
+                <!-- Solution -->
+                <div id="quiz-solution" class="quiz-solution hidden">
+                    <div class="solution-header">
+                        <span class="material-icons-round">lightbulb</span>
+                        <h4>Solution</h4>
+                    </div>
+                    <p id="quiz-solution-text"></p>
+                </div>
+
+                <!-- XP Feedback Panel -->
+                <div class="quiz-session-stats">
+                    <div class="session-stat">
+                        <span class="material-icons-round">star</span>
+                        <span>Session XP</span>
+                    </div>
+                    <div class="session-stat streak-stat">
+                        <span class="material-icons-round">local_fire_department</span>
+                        <span>Streak Active</span>
+                    </div>
+                </div>
+
+                <button class="btn-primary-gradient quiz-next-btn" id="quiz-next-btn" onclick="app.quiz.next()" disabled>
+                    Continue <span class="material-icons-round">arrow_forward</span>
+                </button>
+            </section>
+
+            <!-- ═══════════════════════════════════ -->
+            <!-- RESULTS VIEW                       -->
+            <!-- ═══════════════════════════════════ -->
+            <section id="results-view" class="view-section hidden">
+                <div class="results-card">
+                    <div class="results-emoji" id="results-emoji">🏆</div>
+                    <h1 class="results-title" id="results-title">Outstanding!</h1>
+                    <p class="results-subtitle" id="results-subtitle">You nailed it!</p>
+                    
+                    <!-- Score Ring -->
+                    <div class="score-ring-container">
+                        <svg class="score-ring" viewBox="0 0 120 120">
+                            <circle class="score-ring-bg" cx="60" cy="60" r="52"/>
+                            <circle class="score-ring-fill" id="score-ring-fill" cx="60" cy="60" r="52"/>
+                        </svg>
+                        <span class="score-ring-text" id="results-score">0%</span>
+                    </div>
+                    <div class="results-xp" id="results-xp">+0 XP</div>
+
+                    <!-- Stats Row -->
+                    <div class="results-stats">
+                        <div class="res-stat correct">
+                            <span class="material-icons-round">check_circle</span>
+                            <span id="results-correct">0</span>
+                            <span class="res-label">Correct</span>
+                        </div>
+                        <div class="res-stat wrong">
+                            <span class="material-icons-round">cancel</span>
+                            <span id="results-wrong">0</span>
+                            <span class="res-label">Wrong</span>
+                        </div>
+                        <div class="res-stat time">
+                            <span class="material-icons-round">timer</span>
+                            <span id="results-time">00:00</span>
+                            <span class="res-label">Time</span>
+                        </div>
+                    </div>
+
+                    <!-- Achievements Unlocked -->
+                    <div id="results-achievements" class="results-achievements"></div>
+
+                    <!-- Actions -->
+                    <div class="results-actions">
+                        <button class="btn-primary-gradient" onclick="app.quiz.retry()">
+                            <span class="material-icons-round">replay</span> Try Again
+                        </button>
+                        <button class="btn-secondary" onclick="app.quiz.reviewWrong()">
+                            <span class="material-icons-round">rate_review</span> Review Wrong
+                        </button>
+                        <button class="btn-ghost" onclick="app.ui.goToDashboard()">
+                            <span class="material-icons-round">home</span> Dashboard
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════════════════════ -->
+            <!-- LEADERBOARD / ANALYTICS VIEW       -->
+            <!-- ═══════════════════════════════════ -->
+            <section id="leaderboard-view" class="view-section hidden">
+                <div class="page-header">
+                    <h1>Leaderboard</h1>
+                    <p>See how you stack up against fellow scholars.</p>
+                </div>
+                <div class="leaderboard-actions">
+                    <button class="btn-secondary" onclick="app.excel.exportReport()">
+                        <span class="material-icons-round">download</span> Export Report
+                    </button>
+                </div>
+                <div id="leaderboard-list" class="leaderboard-list"></div>
+            </section>
+
+            <!-- ═══════════════════════════════════ -->
+            <!-- UPLOAD / IMPORT VIEW               -->
+            <!-- ═══════════════════════════════════ -->
+            <section id="upload-view" class="view-section hidden">
+                <div class="page-header">
+                    <h1>Import Questions</h1>
+                    <p>Upload an Excel or CSV file to add your own questions.</p>
+                </div>
+                <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+                    <span class="material-icons-round upload-icon">cloud_upload</span>
+                    <h3>Drag & drop or click to upload</h3>
+                    <p>Supports .xlsx, .xls, .csv files</p>
+                    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="app.excel.handleFile(event)" hidden>
+                </div>
+                <div id="upload-info" class="upload-info hidden">
+                    <span class="material-icons-round">description</span>
+                    <div>
+                        <strong id="upload-file-name">file.xlsx</strong>
+                        <span id="upload-file-meta">0 questions found</span>
+                    </div>
+                </div>
+                <div id="upload-preview" class="upload-preview hidden">
+                    <table>
+                        <thead><tr><th>Topic</th><th>Question</th><th>Options</th><th>Answer</th></tr></thead>
+                        <tbody id="preview-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="upload-actions" class="upload-actions hidden">
+                    <button class="btn-primary-gradient" onclick="app.excel.importQuestions()">
+                        <span class="material-icons-round">check</span> Import All
+                    </button>
+                    <button class="btn-secondary" onclick="app.excel.cancelImport()">
+                        <span class="material-icons-round">close</span> Cancel
+                    </button>
+                </div>
+            </section>
+
+            <!-- ═══════════════════════════════════ -->
+            <!-- PROFILE VIEW                       -->
+            <!-- ═══════════════════════════════════ -->
+            <section id="profile-view" class="view-section hidden">
+                <div class="profile-header-card">
+                    <div class="profile-avatar-lg" id="profile-avatar">A</div>
+                    <h2 id="profile-name">Scholar</h2>
+                    <p class="profile-joined" id="profile-joined">Joined recently</p>
+                    <div class="profile-stats-row">
+                        <div class="p-stat">
+                            <span class="p-stat-value" id="profile-xp">0</span>
+                            <span class="p-stat-label">Total XP</span>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-value" id="profile-streak">0</span>
+                            <span class="p-stat-label">Streak</span>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-value" id="profile-lessons">0</span>
+                            <span class="p-stat-label">Lessons</span>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-value" id="profile-accuracy">0%</span>
+                            <span class="p-stat-label">Accuracy</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-header"><h2>Achievements</h2></div>
+                <div id="achievements-grid" class="achievements-grid"></div>
+
+                <div class="section-header"><h2>Topic Performance</h2></div>
+                <div id="topic-perf-list" class="topic-perf-list"></div>
+            </section>
+
+        </main>
+
+        <!-- ─── MOBILE BOTTOM NAV ─── -->
+        <nav class="mobile-nav">
+            <button class="nav-tab active" data-tab="dashboard" onclick="app.ui.switchTab('dashboard')">
+                <span class="material-icons-round">dashboard</span>
+                <span>Home</span>
+            </button>
+            <button class="nav-tab" data-tab="courses" onclick="app.ui.switchTab('courses')">
+                <span class="material-icons-round">school</span>
+                <span>Courses</span>
+            </button>
+            <button class="nav-tab" data-tab="leaderboard" onclick="app.ui.switchTab('leaderboard')">
+                <span class="material-icons-round">leaderboard</span>
+                <span>Rank</span>
+            </button>
+            <button class="nav-tab" data-tab="profile" onclick="app.ui.switchTab('profile')">
+                <span class="material-icons-round">person</span>
+                <span>Profile</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ═══ SCRIPTS ═══ -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="engine.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
