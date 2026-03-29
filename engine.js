@@ -1,5 +1,5 @@
 /* ============================================
-   SKILLFORGE - GAMIFIED LEARNING PLATFORM
+   KINETIC SCHOLAR - GAMIFIED LEARNING PLATFORM
    Core Engine: Auth, GameState, Courses, Sound
    
    VIVA NOTE: This file contains the core modules

@@ -1,5 +1,5 @@
 /* ============================================
-   SKILLFORGE - Quiz, UI, Excel, Daily, Leaderboard
+   KINETIC SCHOLAR - Quiz, UI, Excel, Daily, Leaderboard
    VIVA NOTE: This file extends the app object from
    engine.js with quiz logic, UI rendering, Excel
    import/export, daily challenges, and leaderboard.
@@ -454,7 +454,7 @@ app.excel = {
         ];
         const ws2 = XLSX.utils.json_to_sheet(infoRows);
         XLSX.utils.book_append_sheet(wb, ws2, 'User Info');
-        XLSX.writeFile(wb, `SkillForge_Report_${app.currentUser.username}.xlsx`);
+        XLSX.writeFile(wb, `KineticScholar_Report_${app.currentUser.username}.xlsx`);
         app.ui.showToast('📊 Report exported!', 'success');
     }
 };
