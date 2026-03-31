@@ -10,11 +10,11 @@
 // ── COURSE MAPPING (NPTEL-Style) ──
 // VIVA NOTE: Groups existing topics into structured courses
 const COURSE_CATEGORIES = [
-    { name: "Quantitative Aptitude", icon: "QA", color: "#8B5CF6", description: "Arithmetic, algebra, and number-based problem solving" },
-    { name: "Logical Reasoning", icon: "LR", color: "#06B6D4", description: "Patterns, deductions, and structured thinking" },
-    { name: "Data Interpretation", icon: "DI", color: "#F59E0B", description: "Charts, tables, and inference from data" },
-    { name: "Verbal Ability", icon: "VA", color: "#22C55E", description: "Language, comprehension, and communication skills" },
-    { name: "Analytical Skills", icon: "AS", color: "#EC4899", description: "Mixed applied aptitude and problem-solving drills" }
+    { name: "Quantitative Aptitude", icon: "🧮", color: "#8B5CF6", description: "Arithmetic, algebra, and number-based problem solving" },
+    { name: "Logical Reasoning", icon: "🧩", color: "#06B6D4", description: "Patterns, deductions, and structured thinking" },
+    { name: "Data Interpretation", icon: "📊", color: "#F59E0B", description: "Charts, tables, and inference from data" },
+    { name: "Verbal Ability", icon: "📝", color: "#22C55E", description: "Language, comprehension, and communication skills" },
+    { name: "Analytical Skills", icon: "🧠", color: "#EC4899", description: "Mixed applied aptitude and problem-solving drills" }
 ];
 
 // ── ACHIEVEMENTS DEFINITIONS ──
