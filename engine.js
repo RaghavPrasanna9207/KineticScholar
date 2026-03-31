@@ -9,23 +9,13 @@
 
 // ── COURSE MAPPING (NPTEL-Style) ──
 // VIVA NOTE: Groups existing topics into structured courses
-const COURSE_MAP = {
-    "Quantitative Aptitude": {
-        icon: "🧮", color: "#8B5CF6",
-        description: "Master numbers, time & calculations",
-        topics: ["Clocks", "Calendar"]
-    },
-    "Logical Reasoning": {
-        icon: "🧩", color: "#06B6D4",
-        description: "Sharpen your logical thinking",
-        topics: ["Direction Sense", "Cubes"]
-    },
-    "Data Analysis": {
-        icon: "📊", color: "#F59E0B",
-        description: "Analyze data & draw conclusions",
-        topics: ["Data sufficiency", "Data Sufficiency", "Caselet Problems"]
-    }
-};
+const COURSE_CATEGORIES = [
+    { name: "Quantitative Aptitude", icon: "QA", color: "#8B5CF6", description: "Arithmetic, algebra, and number-based problem solving" },
+    { name: "Logical Reasoning", icon: "LR", color: "#06B6D4", description: "Patterns, deductions, and structured thinking" },
+    { name: "Data Interpretation", icon: "DI", color: "#F59E0B", description: "Charts, tables, and inference from data" },
+    { name: "Verbal Ability", icon: "VA", color: "#22C55E", description: "Language, comprehension, and communication skills" },
+    { name: "Analytical Skills", icon: "AS", color: "#EC4899", description: "Mixed applied aptitude and problem-solving drills" }
+];
 
 // ── ACHIEVEMENTS DEFINITIONS ──
 const ACHIEVEMENTS = [
@@ -223,24 +213,18 @@ const app = {
     // ════════════════════════════════════
     courses: {
         getAll() {
-            const allTopics = [...new Set(app.data.map(q => q.Topic))];
-            const courses = [];
-            const assigned = new Set();
-            // Map known courses
-            Object.entries(COURSE_MAP).forEach(([name, info]) => {
-                const matchedTopics = info.topics.filter(t => allTopics.includes(t));
-                const uniqueTopics = [...new Set(matchedTopics)];
-                if (uniqueTopics.length > 0) {
-                    courses.push({ name, ...info, topics: uniqueTopics });
-                    uniqueTopics.forEach(t => assigned.add(t));
-                }
+            const allTopics = [...new Set(app.data.map(q => q.Topic))].sort((a, b) => a.localeCompare(b));
+            if (allTopics.length === 0) return [];
+
+            // Distribute topics round-robin so category sizes stay nearly equal.
+            const topicBuckets = COURSE_CATEGORIES.map(() => []);
+            allTopics.forEach((topic, idx) => {
+                topicBuckets[idx % COURSE_CATEGORIES.length].push(topic);
             });
-            // Collect unassigned topics
-            const other = allTopics.filter(t => !assigned.has(t));
-            if (other.length > 0) {
-                courses.push({ name: "Other Topics", icon: "📝", color: "#A855F7", description: "Additional practice", topics: other });
-            }
-            return courses;
+
+            return COURSE_CATEGORIES
+                .map((category, idx) => ({ ...category, topics: topicBuckets[idx] }))
+                .filter(category => category.topics.length > 0);
         },
         getProgress(courseName) {
             const course = app.courses.getAll().find(c => c.name === courseName);
@@ -375,3 +359,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
