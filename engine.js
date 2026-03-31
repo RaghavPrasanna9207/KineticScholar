@@ -1,14 +1,4 @@
-/* ============================================
-   KINETIC SCHOLAR - GAMIFIED LEARNING PLATFORM
-   Core Engine: Auth, GameState, Courses, Sound
-   
-   VIVA NOTE: This file contains the core modules
-   that power the gamification system. The quiz
-   logic preserves the original answer validation.
-   ============================================ */
-
-// ── COURSE MAPPING (NPTEL-Style) ──
-// VIVA NOTE: Groups existing topics into structured courses
+/* Core app engine: auth, game state, courses, sound, and confetti. */
 const COURSE_CATEGORIES = [
     { name: "Quantitative Aptitude", icon: "🧮", color: "#8B5CF6", description: "Arithmetic, algebra, and number-based problem solving" },
     { name: "Logical Reasoning", icon: "🧩", color: "#06B6D4", description: "Patterns, deductions, and structured thinking" },
@@ -17,7 +7,6 @@ const COURSE_CATEGORIES = [
     { name: "Analytical Skills", icon: "🧠", color: "#EC4899", description: "Mixed applied aptitude and problem-solving drills" }
 ];
 
-// ── ACHIEVEMENTS DEFINITIONS ──
 const ACHIEVEMENTS = [
     { id: "first_lesson", name: "First Steps", icon: "🎯", desc: "Complete your first lesson", check: s => s.lessonsCompleted >= 1 },
     { id: "perfect", name: "Perfectionist", icon: "💎", desc: "Score 100% in a lesson", check: s => s.perfectScores >= 1 },
@@ -30,8 +19,6 @@ const ACHIEVEMENTS = [
     { id: "daily5", name: "Challenger", icon: "⚔️", desc: "Complete 5 daily challenges", check: s => s.dailyChallenges >= 5 },
 ];
 
-// ── LEVEL THRESHOLDS ──
-// VIVA NOTE: XP required for each level, similar to Duolingo's progression
 function getLevelInfo(xp) {
     const thresholds = [0,100,250,500,800,1200,1700,2300,3000,3800,4700,5700,6800,8000,9500,11000,13000,15500,18500,22000,26000,30000];
     let level = 1;
@@ -44,19 +31,13 @@ function getLevelInfo(xp) {
     return { level, currentThreshold, nextThreshold, progress: Math.min(100, Math.max(0, progress)) };
 }
 
-// ── MAIN APP OBJECT ──
 const app = {
     data: [],             // All questions from JSON + imported
     importedData: [],     // Questions from Excel upload
     currentUser: null,    // Logged-in user object
 
-    // ════════════════════════════════════
-    // AUTH MODULE
-    // VIVA NOTE: localStorage-based auth
-    // ════════════════════════════════════
     auth: {
         init() {
-            // Check for existing session
             const saved = localStorage.getItem('sf_current_user');
             if (saved) {
                 app.currentUser = JSON.parse(saved);
@@ -118,7 +99,6 @@ const app = {
             localStorage.removeItem('sf_current_user');
             document.getElementById('app-container').classList.add('hidden');
             document.getElementById('auth-screen').classList.remove('hidden');
-            // Clear form fields
             document.querySelectorAll('#auth-screen input').forEach(i => i.value = '');
             document.querySelectorAll('.auth-error').forEach(e => e.textContent = '');
             app.ui.showLogin();
@@ -133,10 +113,6 @@ const app = {
         }
     },
 
-    // ════════════════════════════════════
-    // GAME STATE MODULE
-    // VIVA NOTE: Manages XP, levels, streaks, hearts
-    // ════════════════════════════════════
     game: {
         addXP(amount) {
             const oldLevel = getLevelInfo(app.currentUser.totalXP).level;
@@ -192,7 +168,6 @@ const app = {
                 allTopicsDone: false,
                 dailyChallenges: app.currentUser.dailyChallenges
             };
-            // Check if all topics done
             const allTopics = [...new Set(app.data.map(q => q.Topic))];
             state.allTopicsDone = allTopics.length > 0 && allTopics.every(t => app.currentUser.completedTopics.includes(t));
 
@@ -207,10 +182,6 @@ const app = {
         }
     },
 
-    // ════════════════════════════════════
-    // COURSE MODULE (NPTEL-Style)
-    // VIVA NOTE: Groups topics into courses
-    // ════════════════════════════════════
     courses: {
         getAll() {
             const allTopics = [...new Set(app.data.map(q => q.Topic))].sort((a, b) => a.localeCompare(b));
@@ -233,7 +204,6 @@ const app = {
             return Math.round((completed / course.topics.length) * 100);
         },
         getTopicState(topic) {
-            // VIVA NOTE: Determines if a topic is locked/available/completed
             if (app.currentUser.completedTopics.includes(topic)) return 'completed';
             // First topic in each course is always available
             const courses = app.courses.getAll();
@@ -250,10 +220,6 @@ const app = {
         }
     },
 
-    // ════════════════════════════════════
-    // SOUND MODULE
-    // VIVA NOTE: Web Audio API for feedback sounds
-    // ════════════════════════════════════
     sound: {
         ctx: null,
         getCtx() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); return this.ctx; },
@@ -298,9 +264,6 @@ const app = {
         }
     },
 
-    // ════════════════════════════════════
-    // CONFETTI MODULE
-    // ════════════════════════════════════
     confetti: {
         fire() {
             const canvas = document.getElementById('confetti-canvas');
@@ -342,14 +305,11 @@ const app = {
     }
 };
 
-// Attach event listeners after DOM loads
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('login-btn').addEventListener('click', () => app.auth.login());
     document.getElementById('signup-btn').addEventListener('click', () => app.auth.signup());
-    // Enter key support
     document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') app.auth.login(); });
     document.getElementById('signup-password').addEventListener('keydown', e => { if (e.key === 'Enter') app.auth.signup(); });
-    // Drag and drop
     const zone = document.getElementById('upload-zone');
     if (zone) {
         zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });

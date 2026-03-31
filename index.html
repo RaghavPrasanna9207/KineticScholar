@@ -12,18 +12,12 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- ═══ CONFETTI CANVAS ═══ -->
     <canvas id="confetti-canvas"></canvas>
 
-    <!-- ═══ TOAST CONTAINER ═══ -->
     <div id="toast-container"></div>
 
-    <!-- ═══ MODAL CONTAINER ═══ -->
     <div id="modal-container"></div>
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- AUTH SCREEN                            -->
-    <!-- ═══════════════════════════════════════ -->
     <div id="auth-screen" class="auth-screen">
         <div id="auth-particles" class="auth-particles"></div>
         <div class="auth-wrapper">
@@ -35,7 +29,6 @@
                 <p class="brand-subtitle">Master knowledge through play</p>
             </div>
 
-            <!-- Login Card -->
             <div id="login-card" class="auth-card">
                 <h2>Welcome Back</h2>
                 <p class="auth-desc">Continue your learning journey</p>
@@ -54,7 +47,6 @@
                 <p class="auth-switch">Don't have an account? <a href="#" onclick="app.ui.showSignup()">Create one</a></p>
             </div>
 
-            <!-- Signup Card -->
             <div id="signup-card" class="auth-card hidden">
                 <h2>Join the Scholars</h2>
                 <p class="auth-desc">Start earning XP today</p>
@@ -79,12 +71,8 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- MAIN APP CONTAINER                     -->
-    <!-- ═══════════════════════════════════════ -->
     <div id="app-container" class="app-container hidden">
 
-        <!-- ─── SIDEBAR (Desktop) ─── -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
                 <span class="material-icons-round brand-glyph">auto_awesome</span>
@@ -135,10 +123,8 @@
             </div>
         </aside>
 
-        <!-- ─── MAIN CONTENT ─── -->
         <main class="main-content">
 
-            <!-- ─── TOP BAR ─── -->
             <header class="top-bar">
                 <button class="mobile-menu-btn" onclick="app.ui.toggleSidebar()">
                     <span class="material-icons-round">menu</span>
@@ -160,11 +146,7 @@
                 <button class="top-bar-avatar" id="nav-profile-btn" onclick="app.ui.switchTab('profile')">A</button>
             </header>
 
-            <!-- ═══════════════════════════════════ -->
-            <!-- DASHBOARD VIEW                     -->
-            <!-- ═══════════════════════════════════ -->
             <section id="dashboard-view" class="view-section">
-                <!-- Hero Banner -->
                 <div class="hero-banner">
                     <div class="hero-content">
                         <h1 id="welcome-msg">Keep it up, Scholar!</h1>
@@ -184,7 +166,6 @@
                     </div>
                 </div>
 
-                <!-- Quick Actions Row -->
                 <div class="quick-actions">
                     <button class="action-card sync-card" onclick="app.excel.exportReport()">
                         <span class="material-icons-round">cloud_sync</span>
@@ -209,7 +190,6 @@
                     </button>
                 </div>
 
-                <!-- Stats Grid -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon-bg purple"><span class="material-icons-round">star</span></div>
@@ -228,14 +208,12 @@
                     </div>
                 </div>
 
-                <!-- Current Courses -->
                 <div class="section-header">
                     <h2>Current Courses</h2>
                     <button class="see-all-btn" onclick="app.ui.switchTab('courses')">See All <span class="material-icons-round">arrow_forward</span></button>
                 </div>
                 <div id="course-grid" class="course-grid"></div>
 
-                <!-- Recent Achievements -->
                 <div class="section-header">
                     <h2>Recent Achievements</h2>
                     <button class="see-all-btn" onclick="app.ui.switchTab('profile')">View All <span class="material-icons-round">arrow_forward</span></button>
@@ -243,9 +221,6 @@
                 <div id="dashboard-achievements" class="achievements-row"></div>
             </section>
 
-            <!-- ═══════════════════════════════════ -->
-            <!-- COURSES VIEW (Course Selection)    -->
-            <!-- ═══════════════════════════════════ -->
             <section id="courses-view" class="view-section hidden">
                 <div class="page-header">
                     <h1>Choose Your Learning Path</h1>
@@ -261,9 +236,6 @@
                 </div>
             </section>
 
-            <!-- ═══════════════════════════════════ -->
-            <!-- COURSE DETAIL (Topic Selection)    -->
-            <!-- ═══════════════════════════════════ -->
             <section id="course-view" class="view-section hidden">
                 <button class="back-btn" onclick="app.ui.switchTab('courses')">
                     <span class="material-icons-round">arrow_back</span> Back to Courses
@@ -283,9 +255,6 @@
                 </div>
             </section>
 
-            <!-- ═══════════════════════════════════ -->
-            <!-- QUIZ VIEW                          -->
-            <!-- ═══════════════════════════════════ -->
             <section id="quiz-view" class="view-section hidden">
                 <div class="quiz-top-row">
                     <button class="quiz-close-btn" onclick="app.quiz.confirmQuit()">
@@ -310,7 +279,6 @@
 
                 <div class="quiz-options" id="quiz-options"></div>
 
-                <!-- Solution -->
                 <div id="quiz-solution" class="quiz-solution hidden">
                     <div class="solution-header">
                         <span class="material-icons-round">lightbulb</span>
@@ -319,7 +287,6 @@
                     <p id="quiz-solution-text"></p>
                 </div>
 
-                <!-- XP Feedback Panel -->
                 <div class="quiz-session-stats">
                     <div class="session-stat">
                         <span class="material-icons-round">star</span>
@@ -336,16 +303,12 @@
                 </button>
             </section>
 
-            <!-- ═══════════════════════════════════ -->
-            <!-- RESULTS VIEW                       -->
-            <!-- ═══════════════════════════════════ -->
             <section id="results-view" class="view-section hidden">
                 <div class="results-card">
                     <div class="results-emoji" id="results-emoji">🏆</div>
                     <h1 class="results-title" id="results-title">Outstanding!</h1>
                     <p class="results-subtitle" id="results-subtitle">You nailed it!</p>
                     
-                    <!-- Score Ring -->
                     <div class="score-ring-container">
                         <svg class="score-ring" viewBox="0 0 120 120">
                             <circle class="score-ring-bg" cx="60" cy="60" r="52"/>
@@ -355,7 +318,6 @@
                     </div>
                     <div class="results-xp" id="results-xp">+0 XP</div>
 
-                    <!-- Stats Row -->
                     <div class="results-stats">
                         <div class="res-stat correct">
                             <span class="material-icons-round">check_circle</span>
@@ -374,10 +336,8 @@
                         </div>
                     </div>
 
-                    <!-- Achievements Unlocked -->
                     <div id="results-achievements" class="results-achievements"></div>
 
-                    <!-- Actions -->
                     <div class="results-actions">
                         <button class="btn-primary-gradient" onclick="app.quiz.retry()">
                             <span class="material-icons-round">replay</span> Try Again
@@ -392,9 +352,6 @@
                 </div>
             </section>
 
-            <!-- ═══════════════════════════════════ -->
-            <!-- LEADERBOARD / ANALYTICS VIEW       -->
-            <!-- ═══════════════════════════════════ -->
             <section id="leaderboard-view" class="view-section hidden">
                 <div class="page-header">
                     <h1>Leaderboard</h1>
@@ -408,9 +365,6 @@
                 <div id="leaderboard-list" class="leaderboard-list"></div>
             </section>
 
-            <!-- ═══════════════════════════════════ -->
-            <!-- UPLOAD / IMPORT VIEW               -->
-            <!-- ═══════════════════════════════════ -->
             <section id="upload-view" class="view-section hidden">
                 <div class="page-header">
                     <h1>Import Questions</h1>
@@ -445,9 +399,6 @@
                 </div>
             </section>
 
-            <!-- ═══════════════════════════════════ -->
-            <!-- PROFILE VIEW                       -->
-            <!-- ═══════════════════════════════════ -->
             <section id="profile-view" class="view-section hidden">
                 <div class="profile-header-card">
                     <div class="profile-avatar-lg" id="profile-avatar">A</div>
@@ -482,7 +433,6 @@
 
         </main>
 
-        <!-- ─── MOBILE BOTTOM NAV ─── -->
         <nav class="mobile-nav">
             <button class="nav-tab active" data-tab="dashboard" onclick="app.ui.switchTab('dashboard')">
                 <span class="material-icons-round">dashboard</span>
@@ -503,7 +453,6 @@
         </nav>
     </div>
 
-    <!-- ═══ SCRIPTS ═══ -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="engine.js"></script>
     <script src="script.js"></script>
