@@ -167,7 +167,9 @@ input { font-family: var(--font-body); color: inherit; }
 .sidebar-btn:hover { background: var(--surface-container); color: var(--on-surface); }
 
 /* ── Main Content ── */
-.main-content { flex: 1; margin-left: 260px; padding: 24px 32px 100px; max-width: 1200px; }
+.main-content { flex: 1;
+    margin-left: 260px;
+    padding: 24px 32px 100px; }
 
 /* ── Top Bar ── */
 .top-bar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 24px; }
@@ -234,7 +236,10 @@ input { font-family: var(--font-body); color: inherit; }
 .see-all-btn .material-icons-round { font-size: 18px; }
 
 /* ═══ COURSE GRID ═══ */
-.course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.course-grid { display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Changed auto-fill to auto-fit */
+    gap: 16px;
+    margin-bottom: 32px; }
 .course-card { background: var(--surface-container-lowest); border-radius: 1.5rem; padding: 24px;
     display: flex; align-items: flex-start; gap: 16px; cursor: pointer; transition: all 0.2s; }
 .course-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px var(--shadow-tint); }
