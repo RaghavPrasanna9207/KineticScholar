@@ -35,22 +35,92 @@ const app = {
     data: [],             // All questions from JSON + imported
     importedData: [],     // Questions from Excel upload
     currentUser: null,    // Logged-in user object
+    leaderboardUsers: [],
+
+    api: {
+        baseUrl: 'http://localhost:4000/api',
+        accessTokenKey: 'ks_access_token',
+        refreshTokenKey: 'ks_refresh_token',
+
+        get accessToken() { return localStorage.getItem(this.accessTokenKey); },
+        get refreshToken() { return localStorage.getItem(this.refreshTokenKey); },
+
+        setTokens(accessToken, refreshToken) {
+            if (accessToken) localStorage.setItem(this.accessTokenKey, accessToken);
+            if (refreshToken) localStorage.setItem(this.refreshTokenKey, refreshToken);
+        },
+
+        clearTokens() {
+            localStorage.removeItem(this.accessTokenKey);
+            localStorage.removeItem(this.refreshTokenKey);
+        },
+
+        async request(path, options = {}, retry = true) {
+            const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+            if (this.accessToken) headers.Authorization = `Bearer ${this.accessToken}`;
+
+            const response = await fetch(`${this.baseUrl}${path}`, { ...options, headers });
+
+            if (response.status === 401 && retry && this.refreshToken) {
+                const refreshed = await this.refresh();
+                if (refreshed) return this.request(path, options, false);
+            }
+
+            if (!response.ok) {
+                let errBody = {};
+                try { errBody = await response.json(); } catch (_) { errBody = {}; }
+                throw new Error(errBody.error || `Request failed (${response.status})`);
+            }
+
+            const text = await response.text();
+            return text ? JSON.parse(text) : {};
+        },
+
+        async refresh() {
+            if (!this.refreshToken) return false;
+            try {
+                const response = await fetch(`${this.baseUrl}/auth/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken: this.refreshToken }),
+                });
+                if (!response.ok) return false;
+                const payload = await response.json();
+                this.setTokens(payload.accessToken, payload.refreshToken);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        },
+    },
 
     auth: {
-        init() {
-            const saved = localStorage.getItem('sf_current_user');
-            if (saved) {
-                app.currentUser = JSON.parse(saved);
-                const users = app.auth.getUsers();
-                const found = users.find(u => u.username === app.currentUser.username);
-                if (found) { app.currentUser = found; app.auth.onLogin(); return; }
+        normalizeUserShape(user) {
+            if (!user) return null;
+            return {
+                ...user,
+                achievements: Array.isArray(user.achievements) ? user.achievements : [],
+                completedTopics: Array.isArray(user.completedTopics) ? user.completedTopics : [],
+                topicStats: user.topicStats || {},
+            };
+        },
+
+        async init() {
+            if (app.api.accessToken) {
+                try {
+                    const payload = await app.api.request('/auth/me');
+                    app.currentUser = app.auth.normalizeUserShape(payload.user);
+                    app.auth.onLogin();
+                    return;
+                } catch (_) {
+                    app.api.clearTokens();
+                }
             }
             document.getElementById('auth-screen').classList.remove('hidden');
             app.ui.createParticles();
         },
-        getUsers() { return JSON.parse(localStorage.getItem('sf_users') || '[]'); },
-        saveUsers(users) { localStorage.setItem('sf_users', JSON.stringify(users)); },
-        signup() {
+
+        async signup() {
             const username = document.getElementById('signup-username').value.trim();
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value;
@@ -58,58 +128,70 @@ const app = {
             if (!username || username.length < 3) { errEl.textContent = 'Username must be 3+ characters'; return; }
             if (!email.includes('@')) { errEl.textContent = 'Enter a valid email'; return; }
             if (password.length < 4) { errEl.textContent = 'Password must be 4+ characters'; return; }
-            const users = app.auth.getUsers();
-            if (users.find(u => u.username === username)) { errEl.textContent = 'Username taken'; return; }
-            const newUser = {
-                username, email, password: btoa(password), // Basic obfuscation
-                joinedDate: new Date().toISOString(),
-                totalXP: 0, streak: 0, lastActiveDate: null, hearts: 5,
-                lessonsCompleted: 0, perfectScores: 0, topicsCompleted: 0,
-                dailyChallenges: 0, achievements: [], completedTopics: [],
-                topicStats: {}, // { topicName: { attempts, correct, wrong, bestScore } }
-                soundEnabled: true
-            };
-            users.push(newUser);
-            app.auth.saveUsers(users);
-            app.currentUser = newUser;
-            localStorage.setItem('sf_current_user', JSON.stringify(newUser));
-            app.auth.onLogin();
+
+            try {
+                const payload = await app.api.request('/auth/signup', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, email, password }),
+                });
+                app.api.setTokens(payload.accessToken, payload.refreshToken);
+                app.currentUser = app.auth.normalizeUserShape(payload.user);
+                errEl.textContent = '';
+                app.auth.onLogin();
+            } catch (err) {
+                errEl.textContent = err.message || 'Signup failed';
+            }
         },
-        login() {
+
+        async login() {
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
             const errEl = document.getElementById('login-error');
             if (!username || !password) { errEl.textContent = 'Fill in all fields'; return; }
-            const users = app.auth.getUsers();
-            const user = users.find(u => u.username === username && u.password === btoa(password));
-            if (!user) { errEl.textContent = 'Invalid username or password'; return; }
-            app.currentUser = user;
-            localStorage.setItem('sf_current_user', JSON.stringify(user));
-            app.auth.onLogin();
+
+            try {
+                const payload = await app.api.request('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password }),
+                });
+                app.api.setTokens(payload.accessToken, payload.refreshToken);
+                app.currentUser = app.auth.normalizeUserShape(payload.user);
+                errEl.textContent = '';
+                app.auth.onLogin();
+            } catch (err) {
+                errEl.textContent = err.message || 'Login failed';
+            }
         },
+
         onLogin() {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
-            app.game.updateStreak();
             app.ui.goToDashboard();
             app.ui.updateNavStats();
         },
-        logout() {
+
+        async logout() {
+            try { await app.api.request('/auth/logout', { method: 'POST' }); } catch (_) { /* noop */ }
+            app.api.clearTokens();
             app.currentUser = null;
-            localStorage.removeItem('sf_current_user');
             document.getElementById('app-container').classList.add('hidden');
             document.getElementById('auth-screen').classList.remove('hidden');
             document.querySelectorAll('#auth-screen input').forEach(i => i.value = '');
             document.querySelectorAll('.auth-error').forEach(e => e.textContent = '');
             app.ui.showLogin();
         },
-        saveProgress() {
+
+        async saveProgress() {
             if (!app.currentUser) return;
-            const users = app.auth.getUsers();
-            const idx = users.findIndex(u => u.username === app.currentUser.username);
-            if (idx !== -1) users[idx] = app.currentUser;
-            app.auth.saveUsers(users);
-            localStorage.setItem('sf_current_user', JSON.stringify(app.currentUser));
+            try {
+                const payload = await app.api.request('/users/me', {
+                    method: 'PUT',
+                    body: JSON.stringify({ user: app.currentUser }),
+                });
+                app.currentUser = app.auth.normalizeUserShape(payload.user);
+            } catch (_) {
+                // Keep UI responsive if backend call fails; user can retry by continuing usage.
+            }
         }
     },
 
@@ -133,17 +215,7 @@ const app = {
         },
         resetHearts() { app.currentUser.hearts = 5; app.auth.saveProgress(); },
         updateStreak() {
-            const today = new Date().toDateString();
-            const last = app.currentUser.lastActiveDate;
-            if (last === today) return; // Already counted today
-            const yesterday = new Date(Date.now() - 86400000).toDateString();
-            if (last === yesterday) {
-                app.currentUser.streak++;
-            } else if (last !== today) {
-                app.currentUser.streak = 1; // Reset or first day
-            }
-            app.currentUser.lastActiveDate = today;
-            app.auth.saveProgress();
+            // Streak updates are handled by the backend on auth/me and login.
         },
         recordTopicStats(topic, correct, total) {
             if (!app.currentUser.topicStats[topic]) {

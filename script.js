@@ -1,16 +1,16 @@
-/* ============================================
+﻿/* ============================================
    KINETIC SCHOLAR - Quiz, UI, Excel, Daily, Leaderboard
    VIVA NOTE: This file extends the app object from
    engine.js with quiz logic, UI rendering, Excel
    import/export, daily challenges, and leaderboard.
    ============================================ */
 
-// ════════════════════════════════════
+// ------------------------------------
 // QUIZ ENGINE
 // VIVA NOTE: Preserves original answer validation
 // logic (answer_key normalization). Adds hearts,
 // XP rewards, and difficulty tagging on top.
-// ════════════════════════════════════
+// ------------------------------------
 app.quiz = {
     questions: [],
     currentIndex: 0,
@@ -204,6 +204,17 @@ app.quiz = {
             app.currentUser.dailyChallenges = (app.currentUser.dailyChallenges || 0) + 1;
         }
         app.auth.saveProgress();
+        app.api.request('/users/quiz-attempts', {
+            method: 'POST',
+            body: JSON.stringify({
+                topic: this.currentTopic,
+                score: this.score,
+                total,
+                percentage: pct,
+                durationSeconds: this.timerSeconds,
+                isDaily: this.isDaily,
+            }),
+        }).catch(() => {});
         // Check achievements
         const newAchievements = app.game.checkAchievements();
         // Render results
@@ -213,10 +224,10 @@ app.quiz = {
     renderResults(pct, total, achievements) {
         app.ui.switchView('results-view');
         // Emoji & title
-        let emoji = '😞', title = 'Keep Trying!', sub = 'Practice makes perfect';
-        if (pct >= 90) { emoji = '🏆'; title = 'Outstanding!'; sub = 'You nailed it!'; }
-        else if (pct >= 70) { emoji = '🎉'; title = 'Great Job!'; sub = 'Solid performance!'; }
-        else if (pct >= 50) { emoji = '👍'; title = 'Not Bad!'; sub = 'Room to improve'; }
+        let emoji = '??', title = 'Keep Trying!', sub = 'Practice makes perfect';
+        if (pct >= 90) { emoji = '??'; title = 'Outstanding!'; sub = 'You nailed it!'; }
+        else if (pct >= 70) { emoji = '??'; title = 'Great Job!'; sub = 'Solid performance!'; }
+        else if (pct >= 50) { emoji = '??'; title = 'Not Bad!'; sub = 'Room to improve'; }
         document.getElementById('results-emoji').textContent = emoji;
         document.getElementById('results-title').textContent = title;
         document.getElementById('results-subtitle').textContent = sub;
@@ -274,7 +285,7 @@ app.quiz = {
         for (let i = 0; i < 5; i++) {
             const span = document.createElement('span');
             span.className = 'heart-icon' + (i >= app.currentUser.hearts ? ' lost' : '');
-            span.textContent = '❤️';
+            span.textContent = '<3';
             container.appendChild(span);
         }
     },
@@ -290,30 +301,41 @@ app.quiz = {
     }
 };
 
-// ════════════════════════════════════
+// ------------------------------------
 // DAILY CHALLENGE MODULE
-// ════════════════════════════════════
+// ------------------------------------
 app.daily = {
-    start() {
-        const today = new Date().toDateString();
-        const lastDaily = localStorage.getItem('sf_last_daily_' + (app.currentUser?.username || ''));
-        if (lastDaily === today) {
-            app.ui.showToast('Daily challenge already completed! Come back tomorrow.', 'info');
-            return;
+    async start() {
+        try {
+            const status = await app.api.request('/daily/status');
+            if (status.completedToday) {
+                app.ui.showToast('Daily challenge already completed! Come back tomorrow.', 'info');
+                return;
+            }
+            app.quiz.start(null, true);
+            await app.api.request('/daily/complete', { method: 'POST' });
+            app.currentUser.lastDailyDate = new Date().toISOString().slice(0, 10);
+            app.auth.saveProgress();
+        } catch (err) {
+            app.ui.showToast(err.message || 'Could not start daily challenge', 'error');
         }
-        app.quiz.start(null, true);
-        localStorage.setItem('sf_last_daily_' + app.currentUser.username, today);
     }
 };
 
-// ════════════════════════════════════
+// ------------------------------------
 // LEADERBOARD MODULE
-// ════════════════════════════════════
+// ------------------------------------
 app.leaderboard = {
-    render() {
-        const users = app.auth.getUsers();
-        const sorted = [...users].sort((a, b) => (b.totalXP || 0) - (a.totalXP || 0));
+    async render() {
         const container = document.getElementById('leaderboard-list');
+        let sorted = [];
+        try {
+            const payload = await app.api.request('/leaderboard');
+            sorted = payload.users || [];
+        } catch (_err) {
+            container.innerHTML = '<p class="text-muted" style="text-align:center;padding:40px;">Could not load leaderboard.</p>';
+            return;
+        }
         container.innerHTML = '';
         if (sorted.length === 0) { container.innerHTML = '<p class="text-muted" style="text-align:center;padding:40px;">No learners yet!</p>'; return; }
         sorted.forEach((u, i) => {
@@ -324,19 +346,19 @@ app.leaderboard = {
                 <span class="lb-avatar">${(u.username || '?')[0].toUpperCase()}</span>
                 <div class="lb-info">
                     <div class="lb-name">${u.username}${isCurrent ? ' (You)' : ''}</div>
-                    <div class="lb-level">Level ${lvl.level} · 🔥 ${u.streak || 0}</div>
+                    <div class="lb-level">Level ${lvl.level} · Streak ${u.streak || 0}</div>
                 </div>
-                <span class="lb-xp">⭐ ${u.totalXP || 0}</span>
+                <span class="lb-xp">XP ${u.totalXP || 0}</span>
             </div>`;
         });
     }
 };
 
-// ════════════════════════════════════
+// ------------------------------------
 // EXCEL MODULE (SheetJS)
 // VIVA NOTE: Import questions from Excel/CSV
 // and export analytics to Excel.
-// ════════════════════════════════════
+// ------------------------------------
 app.excel = {
     pendingData: null,
 
@@ -376,7 +398,7 @@ app.excel = {
                 this.renderPreview();
                 document.getElementById('upload-actions').classList.remove('hidden');
                 document.getElementById('upload-actions').style.display = 'flex';
-                app.ui.showToast(`📄 ${this.pendingData.length} questions loaded from ${file.name}`, 'success');
+                app.ui.showToast(`?? ${this.pendingData.length} questions loaded from ${file.name}`, 'success');
             } catch (err) {
                 app.ui.showToast('Error reading file: ' + err.message, 'error');
             }
@@ -399,14 +421,20 @@ app.excel = {
         });
     },
 
-    importQuestions() {
+    async importQuestions() {
         if (!this.pendingData || this.pendingData.length === 0) return;
-        app.importedData = [...app.importedData, ...this.pendingData];
-        app.data = [...app.data, ...this.pendingData];
-        // Save imported data to localStorage
-        localStorage.setItem('sf_imported_questions', JSON.stringify(app.importedData));
-        app.ui.showToast(`✅ ${this.pendingData.length} questions imported!`, 'success');
-        this.cancelImport();
+        try {
+            const payload = await app.api.request('/questions/import', {
+                method: 'POST',
+                body: JSON.stringify({ questions: this.pendingData }),
+            });
+            app.importedData = [...app.importedData, ...this.pendingData];
+            app.data = [...app.data, ...this.pendingData];
+            app.ui.showToast(`Imported ${payload.inserted || this.pendingData.length} questions!`, 'success');
+            this.cancelImport();
+        } catch (err) {
+            app.ui.showToast(err.message || 'Failed to import questions', 'error');
+        }
     },
 
     cancelImport() {
@@ -455,13 +483,13 @@ app.excel = {
         const ws2 = XLSX.utils.json_to_sheet(infoRows);
         XLSX.utils.book_append_sheet(wb, ws2, 'User Info');
         XLSX.writeFile(wb, `KineticScholar_Report_${app.currentUser.username}.xlsx`);
-        app.ui.showToast('📊 Report exported!', 'success');
+        app.ui.showToast('?? Report exported!', 'success');
     }
 };
 
-// ════════════════════════════════════
+// ------------------------------------
 // UI CONTROLLER
-// ════════════════════════════════════
+// ------------------------------------
 app.ui = {
     currentView: 'dashboard',
 
@@ -531,12 +559,11 @@ app.ui = {
         document.getElementById('stat-completed').textContent = (u.completedTopics || []).length;
         // Streak display
         const streakEl = document.getElementById('streak-display');
-        if (streakEl) streakEl.textContent = `${u.streak} days 🔥`;
+        if (streakEl) streakEl.textContent = `${u.streak} days ??`;
         // Daily challenge status
-        const today = new Date().toDateString();
-        const lastDaily = localStorage.getItem('sf_last_daily_' + u.username);
-        document.getElementById('daily-status').textContent = lastDaily === today
-            ? '✅ Completed today!' : 'Mixed topics — test your knowledge!';
+        const today = new Date().toISOString().slice(0, 10);
+        document.getElementById('daily-status').textContent = u.lastDailyDate === today
+            ? 'Completed today!' : 'Mixed topics - test your knowledge!';
         // Courses
         this.renderCourses();
         // Dashboard achievements
@@ -623,8 +650,8 @@ app.ui = {
             }
             const node = document.createElement('div');
             node.className = `skill-node ${state}`;
-            let icon = state === 'locked' ? '🔒' : (state === 'completed' ? '⭐' : '📖');
-            let crown = state === 'completed' ? '<span class="node-crown">👑</span>' : '';
+            let icon = state === 'locked' ? '??' : (state === 'completed' ? '?' : '??');
+            let crown = state === 'completed' ? '<span class="node-crown">??</span>' : '';
             let subLabel = state === 'completed' ? `Best: ${stats?.bestScore || 0}%` : `${qCount} questions`;
             node.innerHTML = `<div class="node-circle">${crown}${icon}</div>
                 <div class="node-label">${topic}</div>
@@ -701,10 +728,10 @@ app.ui = {
 
     showToast(msg, type = 'info') {
         const container = document.getElementById('toast-container');
-        const icons = { success: '✅', error: '❌', info: 'ℹ️', xp: '⭐' };
+        const icons = { success: '?', error: '?', info: '??', xp: '?' };
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span><span class="toast-msg">${msg}</span>`;
+        toast.innerHTML = `<span class="toast-icon">${icons[type] || '??'}</span><span class="toast-msg">${msg}</span>`;
         container.appendChild(toast);
         setTimeout(() => { toast.classList.add('toast-exit'); setTimeout(() => toast.remove(), 300); }, 3000);
     },
@@ -759,10 +786,10 @@ app.ui = {
     }
 };
 
-// ════════════════════════════════════
+// ------------------------------------
 // APP INITIALIZATION
 // VIVA NOTE: Loads questions, then checks auth
-// ════════════════════════════════════
+// ------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
     // Inject SVG gradient for score ring
     const svgNS = 'http://www.w3.org/2000/svg';
@@ -777,20 +804,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     app.ui.initTheme();
 
     try {
-        const response = await fetch('questions.json');
-        if (!response.ok) throw new Error('Failed to load questions');
-        app.data = await response.json();
-        console.log('✅ Questions loaded:', app.data.length);
-        // Load imported questions from localStorage
-        const imported = localStorage.getItem('sf_imported_questions');
-        if (imported) {
-            app.importedData = JSON.parse(imported);
-            app.data = [...app.data, ...app.importedData];
-            console.log('✅ Imported questions loaded:', app.importedData.length);
-        }
+        const payload = await app.api.request('/questions');
+        app.data = payload.questions || [];
+        console.log('Questions loaded from backend:', app.data.length);
     } catch (err) {
         console.error('Error loading questions:', err);
     }
     // Initialize auth (checks for existing session)
-    app.auth.init();
+    await app.auth.init();
 });
+
