@@ -1,22 +1,22 @@
 /* Core app engine: auth, game state, courses, sound, and confetti. */
 const COURSE_CATEGORIES = [
-    { name: "Quantitative Aptitude", icon: "🧮", color: "#8B5CF6", description: "Arithmetic, algebra, and number-based problem solving" },
-    { name: "Logical Reasoning", icon: "🧩", color: "#06B6D4", description: "Patterns, deductions, and structured thinking" },
-    { name: "Data Interpretation", icon: "📊", color: "#F59E0B", description: "Charts, tables, and inference from data" },
-    { name: "Verbal Ability", icon: "📝", color: "#22C55E", description: "Language, comprehension, and communication skills" },
-    { name: "Analytical Skills", icon: "🧠", color: "#EC4899", description: "Mixed applied aptitude and problem-solving drills" }
+    { name: "Quantitative Aptitude", icon: "\u{1F9EE}", color: "#8B5CF6", description: "Arithmetic, algebra, and number-based problem solving" },
+    { name: "Logical Reasoning", icon: "\u{1F9E9}", color: "#06B6D4", description: "Patterns, deductions, and structured thinking" },
+    { name: "Data Interpretation", icon: "\u{1F4CA}", color: "#F59E0B", description: "Charts, tables, and inference from data" },
+    { name: "Verbal Ability", icon: "\u{1F4DD}", color: "#22C55E", description: "Language, comprehension, and communication skills" },
+    { name: "Analytical Skills", icon: "\u{1F9E0}", color: "#EC4899", description: "Mixed applied aptitude and problem-solving drills" }
 ];
 
 const ACHIEVEMENTS = [
-    { id: "first_lesson", name: "First Steps", icon: "🎯", desc: "Complete your first lesson", check: s => s.lessonsCompleted >= 1 },
-    { id: "perfect", name: "Perfectionist", icon: "💎", desc: "Score 100% in a lesson", check: s => s.perfectScores >= 1 },
-    { id: "streak3", name: "On Fire", icon: "🔥", desc: "3-day streak", check: s => s.streak >= 3 },
-    { id: "streak7", name: "Unstoppable", icon: "⚡", desc: "7-day streak", check: s => s.streak >= 7 },
-    { id: "xp500", name: "Rising Star", icon: "⭐", desc: "Earn 500 XP", check: s => s.totalXP >= 500 },
-    { id: "xp2000", name: "XP Master", icon: "🌟", desc: "Earn 2000 XP", check: s => s.totalXP >= 2000 },
-    { id: "topics3", name: "Explorer", icon: "🗺️", desc: "Complete 3 topics", check: s => s.topicsCompleted >= 3 },
-    { id: "topics_all", name: "Scholar", icon: "🎓", desc: "Complete all topics", check: s => s.allTopicsDone },
-    { id: "daily5", name: "Challenger", icon: "⚔️", desc: "Complete 5 daily challenges", check: s => s.dailyChallenges >= 5 },
+    { id: "first_lesson", name: "First Steps", icon: "\u{1F3AF}", desc: "Complete your first lesson", check: s => s.lessonsCompleted >= 1 },
+    { id: "perfect", name: "Perfectionist", icon: "\u{1F48E}", desc: "Score 100% in a lesson", check: s => s.perfectScores >= 1 },
+    { id: "streak3", name: "On Fire", icon: "\u{1F525}", desc: "3-day streak", check: s => s.streak >= 3 },
+    { id: "streak7", name: "Unstoppable", icon: "\u26A1", desc: "7-day streak", check: s => s.streak >= 7 },
+    { id: "xp500", name: "Rising Star", icon: "\u2B50", desc: "Earn 500 XP", check: s => s.totalXP >= 500 },
+    { id: "xp2000", name: "XP Master", icon: "\u{1F31F}", desc: "Earn 2000 XP", check: s => s.totalXP >= 2000 },
+    { id: "topics3", name: "Explorer", icon: "\u{1F5FA}\uFE0F", desc: "Complete 3 topics", check: s => s.topicsCompleted >= 3 },
+    { id: "topics_all", name: "Scholar", icon: "\u{1F393}", desc: "Complete all topics", check: s => s.allTopicsDone },
+    { id: "daily5", name: "Challenger", icon: "\u2694\uFE0F", desc: "Complete 5 daily challenges", check: s => s.dailyChallenges >= 5 },
 ];
 
 function getLevelInfo(xp) {
@@ -203,7 +203,7 @@ const app = {
             app.auth.saveProgress();
             app.ui.updateNavStats();
             if (newLevel > oldLevel) {
-                app.ui.showToast(`🎉 Level Up! You're now Level ${newLevel}!`, 'xp');
+                app.ui.showToast(`\u{1F389} Level Up! You're now Level ${newLevel}!`, 'xp');
                 app.sound.play('levelup');
             }
         },
@@ -332,7 +332,7 @@ const app = {
         toggle() {
             app.currentUser.soundEnabled = !app.currentUser.soundEnabled;
             app.auth.saveProgress();
-            app.ui.showToast(app.currentUser.soundEnabled ? '🔊 Sound On' : '🔇 Sound Off', 'info');
+            app.ui.showToast(app.currentUser.soundEnabled ? '\u{1F50A} Sound On' : '\u{1F507} Sound Off', 'info');
         }
     },
 
@@ -391,4 +391,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-

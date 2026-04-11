@@ -224,10 +224,10 @@ app.quiz = {
     renderResults(pct, total, achievements) {
         app.ui.switchView('results-view');
         // Emoji & title
-        let emoji = '??', title = 'Keep Trying!', sub = 'Practice makes perfect';
-        if (pct >= 90) { emoji = '??'; title = 'Outstanding!'; sub = 'You nailed it!'; }
-        else if (pct >= 70) { emoji = '??'; title = 'Great Job!'; sub = 'Solid performance!'; }
-        else if (pct >= 50) { emoji = '??'; title = 'Not Bad!'; sub = 'Room to improve'; }
+        let emoji = '\u{1F4DA}', title = 'Keep Trying!', sub = 'Practice makes perfect';
+        if (pct >= 90) { emoji = '\u{1F3C6}'; title = 'Outstanding!'; sub = 'You nailed it!'; }
+        else if (pct >= 70) { emoji = '\u{1F389}'; title = 'Great Job!'; sub = 'Solid performance!'; }
+        else if (pct >= 50) { emoji = '\u{1F44D}'; title = 'Not Bad!'; sub = 'Room to improve'; }
         document.getElementById('results-emoji').textContent = emoji;
         document.getElementById('results-title').textContent = title;
         document.getElementById('results-subtitle').textContent = sub;
@@ -398,7 +398,7 @@ app.excel = {
                 this.renderPreview();
                 document.getElementById('upload-actions').classList.remove('hidden');
                 document.getElementById('upload-actions').style.display = 'flex';
-                app.ui.showToast(`?? ${this.pendingData.length} questions loaded from ${file.name}`, 'success');
+                app.ui.showToast(`\u{1F4E5} ${this.pendingData.length} questions loaded from ${file.name}`, 'success');
             } catch (err) {
                 app.ui.showToast('Error reading file: ' + err.message, 'error');
             }
@@ -483,7 +483,7 @@ app.excel = {
         const ws2 = XLSX.utils.json_to_sheet(infoRows);
         XLSX.utils.book_append_sheet(wb, ws2, 'User Info');
         XLSX.writeFile(wb, `KineticScholar_Report_${app.currentUser.username}.xlsx`);
-        app.ui.showToast('?? Report exported!', 'success');
+        app.ui.showToast('\u{1F4CA} Report exported!', 'success');
     }
 };
 
@@ -559,7 +559,7 @@ app.ui = {
         document.getElementById('stat-completed').textContent = (u.completedTopics || []).length;
         // Streak display
         const streakEl = document.getElementById('streak-display');
-        if (streakEl) streakEl.textContent = `${u.streak} days ??`;
+        if (streakEl) streakEl.textContent = `${u.streak} days \u{1F525}`;
         // Daily challenge status
         const today = new Date().toISOString().slice(0, 10);
         document.getElementById('daily-status').textContent = u.lastDailyDate === today
@@ -650,8 +650,8 @@ app.ui = {
             }
             const node = document.createElement('div');
             node.className = `skill-node ${state}`;
-            let icon = state === 'locked' ? '??' : (state === 'completed' ? '?' : '??');
-            let crown = state === 'completed' ? '<span class="node-crown">??</span>' : '';
+            let icon = state === 'locked' ? '\u{1F512}' : (state === 'completed' ? '\u2705' : '\u{25B6}\uFE0F');
+            let crown = state === 'completed' ? '<span class="node-crown">\u{1F451}</span>' : '';
             let subLabel = state === 'completed' ? `Best: ${stats?.bestScore || 0}%` : `${qCount} questions`;
             node.innerHTML = `<div class="node-circle">${crown}${icon}</div>
                 <div class="node-label">${topic}</div>
@@ -728,10 +728,10 @@ app.ui = {
 
     showToast(msg, type = 'info') {
         const container = document.getElementById('toast-container');
-        const icons = { success: '?', error: '?', info: '??', xp: '?' };
+        const icons = { success: '\u2705', error: '\u274C', info: '\u2139\uFE0F', xp: '\u2B50' };
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        toast.innerHTML = `<span class="toast-icon">${icons[type] || '??'}</span><span class="toast-msg">${msg}</span>`;
+        toast.innerHTML = `<span class="toast-icon">${icons[type] || '\u{1F4AC}'}</span><span class="toast-msg">${msg}</span>`;
         container.appendChild(toast);
         setTimeout(() => { toast.classList.add('toast-exit'); setTimeout(() => toast.remove(), 300); }, 3000);
     },
